@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CreditEngine.Api/CreditEngine.Api.csproj" />
+    <Project Path="src/CreditEngine.Domain/CreditEngine.Domain.csproj" />
+    <Project Path="src/CreditEngine.Infrastructure/CreditEngine.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CreditEngine.Api.Tests/CreditEngine.Api.Tests.csproj" />
+    <Project Path="tests/CreditEngine.Domain.Tests/CreditEngine.Domain.Tests.csproj" />
+  </Folder>
+</Solution>
