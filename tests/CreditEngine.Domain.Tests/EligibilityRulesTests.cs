@@ -76,6 +76,14 @@ public class EligibilityRulesTests
         Assert.False(Run<PostLoanLeverage>(Valid(ebitda: 0m)).Passed);
     }
 
+    [Fact] public void Reasons_use_brazilian_number_format()
+    {
+        var prev = System.Globalization.CultureInfo.CurrentCulture;
+        System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.InvariantCulture;
+        try { Assert.Contains("4.800.000", Run<RevenueRange>(Valid()).Reason); }
+        finally { System.Globalization.CultureInfo.CurrentCulture = prev; }
+    }
+
     [Fact] public void RatingNotE_fails_for_negative_ebitda() =>
         Assert.False(Run<RatingNotE>(Valid(ebitda: -1m)).Passed);
 }

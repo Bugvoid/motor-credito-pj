@@ -1,5 +1,8 @@
 using System.Text.Json.Serialization;
+using Amazon.SQS;
 using CreditEngine.Api;
+using CreditEngine.Infrastructure.Messaging;
+using Microsoft.Extensions.Options;
 using CreditEngine.Api.Endpoints;
 using CreditEngine.Infrastructure.Enrichment;
 using CreditEngine.Infrastructure.Persistence;
@@ -23,6 +26,18 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
 builder.Services.AddHealthChecks().AddDbContextCheck<CreditDbContext>();
+
+builder.Services.Configure<SqsOptions>(builder.Configuration.GetSection("Sqs"));
+if (builder.Configuration.GetValue<bool>("Outbox:Enabled"))
+{
+    builder.Services.AddSingleton<IAmazonSQS>(sp =>
+    {
+        var url = sp.GetRequiredService<IOptions<SqsOptions>>().Value.ServiceUrl;
+        // ServiceUrl preenchido = LocalStack; vazio = AWS real, com região e credenciais da cadeia padrão.
+        return string.IsNullOrEmpty(url) ? new AmazonSQSClient() : new AmazonSQSClient(new AmazonSQSConfig { ServiceURL = url });
+    });
+    builder.Services.AddHostedService<OutboxPublisher>();
+}
 
 var app = builder.Build();
 

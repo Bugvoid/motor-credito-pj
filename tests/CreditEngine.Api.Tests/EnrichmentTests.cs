@@ -33,6 +33,13 @@ public class EnrichmentTests
         Assert.Equal(new CompanyProfile("ATIVA", new DateOnly(2015, 3, 10), "6201501"), p);
     }
 
+    [Fact] public async Task Sends_user_agent()
+    {
+        string? ua = null;
+        await Registry(req => { ua = req.Headers.UserAgent.ToString(); return new(HttpStatusCode.NotFound); }).FindAsync(Cnpj, default);
+        Assert.StartsWith("motor-credito-pj", ua);
+    }
+
     [Fact] public async Task NotFound_is_inexistente() =>
         Assert.Equal("INEXISTENTE", (await Registry(_ => new(HttpStatusCode.NotFound)).FindAsync(Cnpj, default))!.RegistrationStatus);
 

@@ -11,13 +11,17 @@ namespace CreditEngine.Infrastructure.Enrichment;
 
 public sealed class BrasilApiCompanyRegistry(HttpClient http, ILogger<BrasilApiCompanyRegistry>? log = null) : ICompanyRegistry
 {
+    private const string UserAgent = "motor-credito-pj/1.0 (+https://github.com/Bugvoid/motor-credito-pj)";
     private readonly ILogger _log = log ?? NullLogger<BrasilApiCompanyRegistry>.Instance;
 
     public async Task<CompanyProfile?> FindAsync(Cnpj cnpj, CancellationToken ct)
     {
         try
         {
-            using var resp = await http.GetAsync($"api/cnpj/v1/{cnpj.Digits}", ct);
+            using var req = new HttpRequestMessage(HttpMethod.Get, $"api/cnpj/v1/{cnpj.Digits}");
+            // Sem User-Agent a BrasilAPI responde 429.
+            req.Headers.UserAgent.ParseAdd(UserAgent);
+            using var resp = await http.SendAsync(req, ct);
             if (resp.StatusCode == HttpStatusCode.NotFound) return new CompanyProfile("INEXISTENTE", default, "");
             if (!resp.IsSuccessStatusCode)
             {

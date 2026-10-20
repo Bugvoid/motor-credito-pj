@@ -1,10 +1,17 @@
+using System.Globalization;
+
 namespace CreditEngine.Domain.Policy;
 
 public abstract class Rule : IEligibilityRule
 {
     public abstract RuleResult Evaluate(EnrichedApplication a);
 
+    private static readonly CultureInfo PtBr = CultureInfo.GetCultureInfo("pt-BR");
+
     protected RuleResult Result(bool passed, string reason) => new(GetType().Name, passed, reason);
+
+    // Motivos sempre em pt-BR, independentemente da cultura do servidor.
+    protected static string F(FormattableString s) => s.ToString(PtBr);
 }
 
 public sealed class ActiveRegistration : Rule
@@ -14,7 +21,7 @@ public sealed class ActiveRegistration : Rule
         null => Result(false, "dados cadastrais indisponíveis"),
         "INEXISTENTE" => Result(false, "CNPJ não encontrado"),
         "ATIVA" => Result(true, "situação cadastral ATIVA"),
-        var s => Result(false, $"situação cadastral {s}"),
+        var s => Result(false, F($"situação cadastral {s}")),
     };
 }
 
@@ -24,7 +31,7 @@ public sealed class MinimumAge : Rule
     {
         if (a.Company is null) return Result(false, "dados cadastrais indisponíveis");
         var passed = a.Company.OpenedOn <= a.Today.AddYears(-2);
-        return Result(passed, $"aberta em {a.Company.OpenedOn:yyyy-MM-dd} (mínimo 2 anos)");
+        return Result(passed, F($"aberta em {a.Company.OpenedOn:yyyy-MM-dd} (mínimo 2 anos)"));
     }
 }
 
@@ -35,7 +42,7 @@ public sealed class RevenueRange : Rule
     public override RuleResult Evaluate(EnrichedApplication a)
     {
         var r = a.Application.AnnualRevenue;
-        return Result(r is >= Min and <= Max, $"faturamento {r:N2} (faixa {Min:N0} a {Max:N0})");
+        return Result(r is >= Min and <= Max, F($"faturamento {r:N2} (faixa {Min:N0} a {Max:N0})"));
     }
 }
 
@@ -46,7 +53,7 @@ public sealed class AmountToRevenue : Rule
     public override RuleResult Evaluate(EnrichedApplication a)
     {
         var limit = a.Application.AnnualRevenue * MaxShare;
-        return Result(a.Application.RequestedAmount <= limit, $"valor {a.Application.RequestedAmount:N2} (limite 30% = {limit:N2})");
+        return Result(a.Application.RequestedAmount <= limit, F($"valor {a.Application.RequestedAmount:N2} (limite 30% = {limit:N2})"));
     }
 }
 
@@ -55,7 +62,7 @@ public sealed class TermRange : Rule
     public const int Min = 6, Max = 60;
 
     public override RuleResult Evaluate(EnrichedApplication a) =>
-        Result(a.Application.TermMonths is >= Min and <= Max, $"prazo {a.Application.TermMonths} meses (6 a 60)");
+        Result(a.Application.TermMonths is >= Min and <= Max, F($"prazo {a.Application.TermMonths} meses (6 a 60)"));
 }
 
 public sealed class MinimumBureauScore : Rule
@@ -63,7 +70,7 @@ public sealed class MinimumBureauScore : Rule
     public const int Min = 300;
 
     public override RuleResult Evaluate(EnrichedApplication a) =>
-        Result(a.BureauScore >= Min, $"score {a.BureauScore} (mínimo {Min})");
+        Result(a.BureauScore >= Min, F($"score {a.BureauScore} (mínimo {Min})"));
 }
 
 public sealed class PostLoanLeverage : Rule
@@ -75,7 +82,7 @@ public sealed class PostLoanLeverage : Rule
         var app = a.Application;
         if (app.Ebitda <= 0) return Result(false, "EBITDA não positivo");
         var leverage = (app.NetDebt + app.RequestedAmount) / app.Ebitda;
-        return Result(leverage <= Max, $"alavancagem pós-crédito {leverage:N2}x (máximo {Max}x)");
+        return Result(leverage <= Max, F($"alavancagem pós-crédito {leverage:N2}x (máximo {Max}x)"));
     }
 }
 
@@ -85,6 +92,6 @@ public sealed class RatingNotE : Rule
     {
         var app = a.Application;
         var rating = RatingCalculator.Calculate(app.NetDebt, app.Ebitda, app.AnnualRevenue, a.BureauScore);
-        return Result(rating != Rating.E, $"rating {rating}");
+        return Result(rating != Rating.E, F($"rating {rating}"));
     }
 }
