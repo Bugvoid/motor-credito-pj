@@ -55,7 +55,7 @@ Resposta (resumida):
     { "name": "ActiveRegistration", "passed": true, "reason": "situação cadastral ATIVA" },
     { "name": "PostLoanLeverage", "passed": true, "reason": "alavancagem pós-crédito 2,25x (máximo 4,5x)" }
   ],
-  "offer": { "spreadAnnual": 0.037, "annualRate": 0.1785505, "iof": 493250.00, "cetAnnual": 0.1934, "schedule": [ ... ] }
+  "offer": { "spreadAnnual": 0.037, "annualRate": 0.1785505, "iof": 872500.00, "cetAnnual": 0.2053, "schedule": [ ... ] }
 }
 ```
 
@@ -95,7 +95,7 @@ As faixas são: 8–9 A · 6–7 B · 4–5 C · 2–3 D · 0–1 E. EBITDA ≤ 
 - Garantia: recebíveis −1,0 p.p. · imóvel −1,5 p.p.
 - Piso: 1,0% a.a.
 - Taxa = `(1 + CDI) × (1 + spread) − 1`
-- IOF PJ: 0,0041% ao dia (até 365 dias) + 0,38%
+- IOF PJ: 0,0082% ao dia (até 365 dias) + 0,38%, conforme o Decreto 12.499/2025 (referência: 20/10/2026)
 - CET = TIR do valor líquido recebido contra as parcelas
 
 **Decisão:**

@@ -24,13 +24,13 @@ public class PricingTests
         }
     }
 
-    [Fact] public void Iof_price_100k_12m() => Assert.Equal(1194.08m, CreditIof.Calculate(Schedule.Build(100_000m, 0.01m, 12, Amortization.Price), 100_000m));
+    [Fact] public void Iof_price_100k_12m() => Assert.Equal(2008.16m, CreditIof.Calculate(Schedule.Build(100_000m, 0.01m, 12, Amortization.Price), 100_000m));
 
     [Fact] public void Iof_caps_at_365_days()
     {
         // 24 parcelas: a partir da 13ª (390 dias), o prazo conta como 365.
         var s = Schedule.Build(100_000m, 0.01m, 24, Amortization.Sac);
-        var expected = s.Sum(i => i.Amortization * Math.Min(30 * i.Number, 365) * 0.000041m) + 100_000m * 0.0038m;
+        var expected = s.Sum(i => i.Amortization * Math.Min(30 * i.Number, 365) * 0.000082m) + 100_000m * 0.0038m;
         Assert.Equal(Math.Round(expected, 2, MidpointRounding.AwayFromZero), CreditIof.Calculate(s, 100_000m));
     }
 
@@ -38,5 +38,5 @@ public class PricingTests
         Assert.InRange(Cet.Annual(100_000m, Schedule.Build(100_000m, 0.01m, 12, Amortization.Price)), 0.12682m, 0.12684m); // (1,01)^12 − 1
 
     [Fact] public void Cet_above_rate_with_iof() =>
-        Assert.True(Cet.Annual(100_000m - 1194.08m, Schedule.Build(100_000m, 0.01m, 12, Amortization.Price)) > 0.12684m);
+        Assert.True(Cet.Annual(100_000m - 2008.16m, Schedule.Build(100_000m, 0.01m, 12, Amortization.Price)) > 0.12684m);
 }
